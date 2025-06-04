@@ -22,6 +22,27 @@ pool.connect((err) => {
   }
 });
 
+pool.query(`
+  CREATE TABLE IF NOT EXISTS consultations (
+    id SERIAL PRIMARY KEY,
+    name TEXT,
+    phone TEXT,
+    email TEXT,
+    date DATE,
+    time TEXT,
+    contact_method TEXT,
+    messenger TEXT,
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT now()
+  )
+`, err => {
+  if (err) {
+    console.error("Ошибка при создании таблицы:", err);
+  } else {
+    console.log("Таблица consultations проверена/создана");
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
