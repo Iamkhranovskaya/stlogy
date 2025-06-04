@@ -14,12 +14,24 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
+pool.connect((err) => {
+  if (err) {
+    console.error('Ошибка подключения к базе данных:', err);
+  } else {
+    console.log('Успешное подключение к базе данных');
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
 app.post('/api/consultation', async (req, res) => {
   const { name, phone, email, date, time, contactMethod, messenger, comment } = req.body;
+
+  if (!name || !phone || !email) {
+    return res.status(400).json({ error: 'Обязательные поля не заполнены' });
+  }
 
   try {
     await pool.query(
