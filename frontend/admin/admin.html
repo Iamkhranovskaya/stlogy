@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ-панель | Сайтология</title>
+  <link rel="icon" type="image/png" href="fav.png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body {
+      height: 100%;
+    }
+    body {
+      background: var(--bg-color, #F8FFFF);
+      color: var(--text-color, #2A5A5A);
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-top: 80px;
+    }
+    .admin-container {
+      max-width: 1200px;
+      margin: 60px auto 40px auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 900px) {
+      .admin-container { grid-template-columns: 1fr; }
+    }
+    .admin-card {
+      background: var(--light-color, #fff);
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+      padding: 32px 28px 28px 28px;
+      margin-bottom: 0;
+    }
+    .admin-card h2 {
+      color: var(--accent-color, #4BAEA7);
+      font-size: 1.25em;
+      margin-bottom: 18px;
+    }
+    .consult-list, .project-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .consult-item, .project-item {
+      background: #f8ffff;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      padding: 18px 16px 14px 16px;
+      box-shadow: 0 2px 8px rgba(75,174,167,0.07);
+      font-size: 1.05em;
+    }
+    .consult-item strong {
+      color: var(--accent-color, #4BAEA7);
+    }
+    .consult-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 12px;
+    }
+    .cta-button.small {
+      padding: 8px 18px;
+      font-size: 0.98em;
+      border-radius: 18px;
+    }
+    .project-status {
+      font-size: 0.98em;
+      color: #888;
+      margin-left: 8px;
+    }
+    .project-title {
+      font-weight: 700;
+      color: var(--accent-color, #4BAEA7);
+    }
+    .admin-dashboard-tiles {
+      display: flex;
+      flex-direction: column;
+      max-width: 1100px;
+      margin: 0 0 0 56px;
+      padding: 0;
+      align-items: stretch;
+    }
+    @media (max-width: 900px) {
+      .admin-dashboard-tiles { margin-left: 0; }
+    }
+    .admin-tile {
+      background: var(--light-color, #fff);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      padding: 24px 32px 20px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: auto;
+      min-width: 440px;
+      max-width: 640px;
+      height: auto;
+      flex: 0 0 auto;
+      font-size: 1.2em;
+      margin-bottom: 24px;
+    }
+    .admin-tile:last-child {
+      margin-bottom: 0;
+    }
+    .admin-tile:hover {
+      box-shadow: 0 2px 8px rgba(75,174,167,0.13);
+      transform: translateY(-2px) scale(1.01);
+    }
+    .tile-title {
+      font-size: 1.25em;
+      font-weight: 700;
+      color: var(--accent-color, #4BAEA7);
+      margin-bottom: 8px;
+    }
+    .tile-desc {
+      color: #666;
+      font-size: 0.6em;
+    }
+    .admin-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0;
+      margin-top: 0;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 18px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(75,174,167,0.07);
+    }
+    .admin-table thead tr {
+      border-radius: 0;
+      overflow: visible;
+    }
+    .admin-table th, .admin-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e6f2f2;
+      text-align: left;
+      background: none;
+    }
+    .admin-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .admin-table tbody tr {
+      background: none;
+    }
+    .admin-table tbody tr:hover {
+      background-color: rgba(75, 174, 167, 0.1);
+    }
+    .admin-search {
+      margin-bottom: 12px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1.5px solid #bbb;
+      font-size: 1em;
+      width: 100%;
+      max-width: 340px;
+    }
+    header {
+      position: fixed;
+      top: 0; width: 100%;
+      background: var(--light-color, #fff);
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 18px 32px 18px 32px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--accent-color, #4BAEA7);
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 36px;
+    }
+    nav a {
+      margin-left: 30px;
+      text-decoration: none;
+      color: var(--text-color, #2A5A5A);
+      font-weight: 500;
+    }
+    @media (max-width: 900px) {
+      header {
+        padding: 14px 10px;
+        justify-content: center;
+      }
+      nav {
+        gap: 18px;
+      }
+      .logo {
+        margin-right: 0;
+        justify-content: center;
+      }
+    }
+    .page-wrapper {
+      flex: 1 0 auto;
+    }
+    .footer {
+      flex-shrink: 0;
+      background: var(--light-color, #fff);
+    }
+    .footer-content {
+      background: var(--light-color, #fff);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      text-align: center;
+      padding: 0 20px;
+    }
+    .footer-column {
+      flex: 1;
+      min-width: 250px;
+      margin-bottom: 30px;
+      padding: 0 15px;
+      margin-left: 0 !important;
+    }
+    @media (max-width: 768px) {
+      .footer-column {
+        flex: 100%;
+        text-align: center;
+      }
+      .footer-content {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+    .sort-arrow {
+      display: inline-block;
+      margin-left: 5px;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+    }
+    .sort-arrow.up {
+      border-bottom: 5px solid #2A5A5A;
+    }
+    .sort-arrow.down {
+      border-top: 5px solid #2A5A5A;
+    }
+    th {
+      cursor: pointer;
+      position: relative;
+    }
+    th:hover {
+      background-color: rgba(42, 90, 90, 0.1);
+    }
+    .admin-table tr {
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .admin-table tr:hover {
+      background-color: rgba(75, 174, 167, 0.1);
+    }
+    .lead-card {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 1001;
+      max-width: 500px;
+      width: 90%;
+    }
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+    .close-card {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+    .lead-info {
+      margin: 20px 0;
+    }
+    .lead-info p {
+      margin: 8px 0;
+    }
+    .lead-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      justify-content: space-between;
+    }
+    .lead-action-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    .lead-action-btn.primary {
+      background: var(--accent-color, #4BAEA7);
+      color: white;
+    }
+    .lead-action-btn.secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+    .lead-action-btn:hover {
+      opacity: 0.9;
+    }
+    .lead-status {
+      margin: 20px 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f8f8f8;
+    }
+    .lead-status select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+    .lead-feedback {
+      margin: 20px 0;
+    }
+    .lead-feedback textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 8px;
+      resize: vertical;
+    }
+    .lead-feedback button {
+      margin-top: 12px;
+      padding: 8px 16px;
+      background: var(--accent-color, #4BAEA7);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .lead-feedback button:hover {
+      opacity: 0.9;
+    }
+    .save-changes-btn {
+      padding: 12px 24px;
+      background: var(--accent-color, #4BAEA7);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-top: 20px;
+      float: right;
+    }
+    .save-changes-btn:hover {
+      opacity: 0.9;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      color: #333;
+    }
+    .status-new { background-color: #fff; border: 1px solid #ddd; }
+    .status-in_progress { background-color: #fff3cd; border: 1px solid #ffeeba; }
+    .status-contacted { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+    .status-completed { background-color: #d4edda; border: 1px solid #c3e6cb; }
+    .status-cancelled { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+    .project-card {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 1001;
+      max-width: 600px;
+      width: 90%;
+    }
+    .project-info {
+      margin: 20px 0;
+    }
+    .project-info p {
+      margin: 8px 0;
+    }
+    .project-status {
+      margin: 20px 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f8f8f8;
+    }
+    .project-status select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+    .project-comments {
+      margin: 20px 0;
+    }
+    .project-comments textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 8px;
+      resize: vertical;
+    }
+    .project-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .save-project-btn {
+      padding: 12px 24px;
+      background: var(--accent-color, #4BAEA7);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .save-project-btn:hover {
+      opacity: 0.9;
+    }
+    .project-roadmap {
+      margin: 20px 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f8f8f8;
+    }
+    .project-roadmap textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 8px;
+      resize: vertical;
+    }
+    .employees-block {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(75,174,167,0.07);
+    }
+    .employees-block h3 {
+      margin-top: 0;
+      color: var(--accent-color, #4BAEA7);
+      font-size: 1.25em;
+      margin-bottom: 18px;
+    }
+    .employees-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 18px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(75,174,167,0.07);
+    }
+    .employees-table th, .employees-table td {
+      padding: 12px;
+      border-bottom: 1px solid #e6f2f2;
+      text-align: left;
+    }
+    .employees-table th {
+      background: #f8f8f8;
+      font-weight: 600;
+      color: var(--text-color, #2A5A5A);
+    }
+    .employees-table tbody tr:hover {
+      background-color: rgba(75, 174, 167, 0.1);
+      cursor: pointer;
+    }
+    .employee-card {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 1001;
+      max-width: 500px;
+      width: 90%;
+    }
+    .employee-info {
+      margin: 20px 0;
+    }
+    .employee-info p {
+      margin: 8px 0;
+    }
+    .employee-roles {
+      margin: 20px 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f8f8f8;
+    }
+    .employee-roles select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+    .employee-rights {
+      margin: 20px 0;
+    }
+    .employee-rights textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 8px;
+      resize: vertical;
+    }
+    .employee-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      justify-content: space-between;
+    }
+    .employee-action-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    .employee-action-btn.primary {
+      background: var(--accent-color, #4BAEA7);
+      color: white;
+    }
+    .employee-action-btn.danger {
+      background: #dc3545;
+      color: white;
+    }
+    .employee-action-btn:hover {
+      opacity: 0.9;
+    }
+    .events-panel {
+      background: var(--light-color, #fff);
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+      padding: 24px;
+      width: 380px;
+      min-width: 380px;
+      height: calc(100vh - 200px);
+      position: sticky;
+      top: 100px;
+      overflow-y: auto;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .events-panel.hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .events-panel h3 {
+      color: var(--accent-color, #4BAEA7);
+      font-size: 1.25em;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e6f2f2;
+    }
+    .event-item {
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #f8f8f8;
+      border-radius: 8px;
+      font-size: 0.95em;
+      border-left: 3px solid var(--accent-color, #4BAEA7);
+    }
+    .event-time {
+      color: #666;
+      font-size: 0.85em;
+      margin-bottom: 4px;
+    }
+    .event-title {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .event-details {
+      color: #666;
+      font-size: 0.9em;
+    }
+    .event-type {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      margin-right: 6px;
+    }
+    .event-type.status { background: #e3f2fd; color: #1976d2; }
+    .event-type.employee { background: #e8f5e9; color: #2e7d32; }
+    .event-type.project { background: #fff3e0; color: #f57c00; }
+    .event-type.consult { background: #fce4ec; color: #c2185b; }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <header>
+      <div class="logo">
+        <img src="fav.png" alt="favicon" style="height:32px; margin-left:12px; vertical-align:middle;">
+        САЙТОЛОГИЯ
+      </div>
+      <nav>
+        <a href="index.html#home">Главная</a>
+        <a href="index.html#services">Услуги</a>
+        <a href="index.html#about">Команда</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="blog.html">Блог</a>
+        <a href="cabinet.html" id="loginBtn" style="background: none; border: none; color: var(--accent-color); font-size: 1em; font-weight: 500; margin-left: 30px; cursor: pointer; padding: 0 0; transition: color 0.2s; text-decoration: none;">Войти</a>
+      </nav>
+    </header>
+    <canvas id="backgroundCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1;"></canvas>
+    
+    <div class="admin-container">
+      <div class="events-panel">
+        <h3>История событий</h3>
+        <div id="eventsList"></div>
+      </div>
+      
+      <div class="admin-dashboard-tiles">
+        <div class="admin-tile" data-section="consults">
+          <div class="tile-title">Заявки на консультацию</div>
+          <div class="tile-desc">Все заявки клиентов с фильтрацией и сортировкой</div>
+        </div>
+        <div class="admin-tile" data-section="new-projects">
+          <div class="tile-title">Новые проекты</div>
+          <div class="tile-desc">Проекты, ожидающие начала работы</div>
+        </div>
+        <div class="admin-tile" data-section="active-projects">
+          <div class="tile-title">Проекты в работе</div>
+          <div class="tile-desc">Текущие проекты, этапы, статусы</div>
+        </div>
+        <div class="admin-tile" data-section="employees">
+          <div class="tile-title">Управление сотрудниками</div>
+          <div class="tile-desc">Добавление, редактирование и удаление сотрудников</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section" id="section-consults" style="display:none;">
+      <button class="cta-button small back-to-tiles" type="button">← К разделам</button>
+      <h2>Заявки на консультацию</h2>
+      <input type="text" class="admin-search" placeholder="Поиск по заявкам..." oninput="filterTable('consults')">
+      <table class="admin-table" id="table-consults">
+        <thead>
+          <tr>
+            <th onclick="sortTable('consults', 0)">Имя</th>
+            <th onclick="sortTable('consults', 1)">Телефон</th>
+            <th onclick="sortTable('consults', 2)">Email</th>
+            <th onclick="sortTable('consults', 3)">Дата</th>
+            <th onclick="sortTable('consults', 4)">Время</th>
+            <th onclick="sortTable('consults', 5)">Способ связи</th>
+            <th onclick="sortTable('consults', 6)">Мессенджер</th>
+            <th onclick="sortTable('consults', 7)">Комментарий</th>
+            <th onclick="sortTable('consults', 8)">Статус</th>
+            <th onclick="sortTable('consults', 9)">Обратная связь</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="status-new">
+            <td>Иван Иванов</td>
+            <td>+7 900 123-45-67</td>
+            <td>ivan@mail.ru</td>
+            <td>01.05.2025</td>
+            <td>12:00</td>
+            <td>Телефон</td>
+            <td>Telegram</td>
+            <td>Перезвонить после 15:00</td>
+            <td><span class="status-badge status-new">Новая</span></td>
+            <td></td>
+          </tr>
+          <tr class="status-new">
+            <td>Мария Смирнова</td>
+            <td>+7 911 222-33-44</td>
+            <td>maria@mail.ru</td>
+            <td>02.05.2025</td>
+            <td>15:30</td>
+            <td>WhatsApp</td>
+            <td>WhatsApp</td>
+            <td>Уточнить детали проекта</td>
+            <td><span class="status-badge status-new">Новая</span></td>
+            <td></td>
+          </tr>
+          <tr class="status-new">
+            <td>Петр Сидоров</td>
+            <td>+7 912 555-66-77</td>
+            <td>petr@mail.ru</td>
+            <td>03.05.2025</td>
+            <td>10:15</td>
+            <td>Телефон</td>
+            <td>Viber</td>
+            <td></td>
+            <td><span class="status-badge status-new">Новая</span></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="admin-section" id="section-new-projects" style="display:none;">
+      <button class="cta-button small back-to-tiles" type="button">← К разделам</button>
+      <h2>Новые проекты</h2>
+      <input type="text" class="admin-search" placeholder="Поиск по проектам..." oninput="filterTable('new-projects')">
+      <table class="admin-table" id="table-new-projects">
+        <thead>
+          <tr>
+            <th onclick="sortTable('new-projects', 0)">Клиент</th>
+            <th onclick="sortTable('new-projects', 1)">Название</th>
+            <th onclick="sortTable('new-projects', 2)">Дата старта</th>
+            <th onclick="sortTable('new-projects', 3)">Дорожная карта</th>
+            <th onclick="sortTable('new-projects', 4)">Статус</th>
+            <th onclick="sortTable('new-projects', 5)">Комментарий</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Иван Иванов</td><td>Сайт для школы №1</td><td>05.05.2025</td><td>Ожидание</td><td>Ожидание</td><td></td></tr>
+          <tr><td>Мария Смирнова</td><td>Интернет-магазин мебели</td><td>06.05.2025</td><td>Ожидание</td><td>Ожидание</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="admin-section" id="section-active-projects" style="display:none;">
+      <button class="cta-button small back-to-tiles" type="button">← К разделам</button>
+      <h2>Проекты в работе</h2>
+      <input type="text" class="admin-search" placeholder="Поиск по проектам..." oninput="filterTable('active-projects')">
+      <table class="admin-table" id="table-active-projects">
+        <thead>
+          <tr>
+            <th onclick="sortTable('active-projects', 0)">Название</th>
+            <th onclick="sortTable('active-projects', 1)">Клиент</th>
+            <th onclick="sortTable('active-projects', 2)">Этап</th>
+            <th onclick="sortTable('active-projects', 3)">Статус</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Сайт для мебельной фабрики</td><td>Петр Сидоров</td><td>Дизайн</td><td>В работе</td></tr>
+          <tr><td>Лендинг для стартапа</td><td>Иван Иванов</td><td>Прототип</td><td>В работе</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="admin-section" id="section-employees" style="display:none;">
+      <button class="cta-button small back-to-tiles" type="button">← К разделам</button>
+      <h2>Управление сотрудниками</h2>
+      <div id="employees-block" class="employees-block">
+        <h3>Список сотрудников</h3>
+        <button class="btn" onclick="showEmployeeForm()">Добавить сотрудника</button>
+        <table class="employees-table">
+          <thead>
+            <tr>
+              <th>ФИО</th>
+              <th>Роль</th>
+              <th>Права</th>
+              <th>Телефон</th>
+              <th>Email</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="employeesTbody"></tbody>
+        </table>
+        <div id="employeeFormBlock" style="display:none; margin-top:18px;"></div>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-column">
+        <img src="logo.jpg" alt="Логотип" style="height: 180px; max-height: 95%; width: auto; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); object-fit: contain; display: block;">
+        <div style="margin-top: 18px; font-size: 1.1em; color: #2A5A5A; text-align: center;">Мы в социальных сетях</div>
+        <div style="display: flex; gap: 16px; margin-top: 10px;">
+          <a href="https://vk.com" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #4BAEA7; transition: background 0.2s;"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/vk.svg" alt="VK" style="width: 22px; height: 22px; filter: invert(1);"></a>
+          <a href="https://t.me" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #229ED9; transition: background 0.2s;"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/telegram.svg" alt="Telegram" style="width: 22px; height: 22px; filter: invert(1);"></a>
+          <a href="https://wa.me" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #25D366; transition: background 0.2s;"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" style="width: 22px; height: 22px; filter: invert(1);"></a>
+          <a href="https://instagram.com" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #E1306C; transition: background 0.2s;"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram" style="width: 22px; height: 22px; filter: invert(1);"></a>
+        </div>
+      </div>
+      <div class="footer-column">
+        <h4>Юридическая информация</h4>
+        <p>ОГРН: 1245000140220</p>
+        <p>ИНН: 5024249437</p>
+        <p>КПП: 502401001</p>
+        <p>Юридический адрес:<br>
+          143082, Московская область,<br>
+          г Красногорск, ул Липовой Рощи,<br>
+          д. 1 к. 3, помещ. 431</p>
+      </div>
+      <div class="footer-column">
+        <h4>Контакты</h4>
+        <p>+7 (925) 566-46-78</p>
+        <p>Email: 1hkv@bk.ru</p>
+      </div>
+      <div class="footer-column">
+        <h4>Навигация</h4>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          <li style="margin-bottom: 10px;"><a href="index.html#home">Главная</a></li>
+          <li style="margin-bottom: 10px;"><a href="index.html#services">Услуги</a></li>
+          <li style="margin-bottom: 10px;"><a href="index.html#about">Команда</a></li>
+          <li style="margin-bottom: 10px;"><a href="index.html#faq">FAQ</a></li>
+          <li><a href="blog.html">Блог</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Все права защищены</p>
+    </div>
+  </footer>
+
+  <div class="overlay" id="overlay"></div>
+  <div class="lead-card" id="leadCard">
+    <button class="close-card" onclick="closeLeadCard()">&times;</button>
+    <h3>Детали заявки</h3>
+    <div class="lead-info">
+      <p><strong>Имя:</strong> <span id="leadName"></span></p>
+      <p><strong>Телефон:</strong> <span id="leadPhone"></span></p>
+      <p><strong>Email:</strong> <span id="leadEmail"></span></p>
+      <p><strong>Дата:</strong> <span id="leadDate"></span></p>
+      <p><strong>Время:</strong> <span id="leadTime"></span></p>
+      <p><strong>Способ связи:</strong> <span id="leadContactMethod"></span></p>
+      <p><strong>Мессенджер:</strong> <span id="leadMessenger"></span></p>
+      <p><strong>Комментарий:</strong> <span id="leadComment"></span></p>
+    </div>
+    <div class="lead-status">
+      <strong>Статус обработки:</strong>
+      <select id="leadStatus">
+        <option value="new">Новая</option>
+        <option value="in_progress">В обработке</option>
+        <option value="contacted">Связались</option>
+        <option value="completed">Завершена</option>
+        <option value="cancelled">Отменена</option>
+      </select>
+    </div>
+    <div class="lead-feedback">
+      <strong>Обратная связь:</strong>
+      <textarea id="leadFeedback" placeholder="Введите информацию о контакте с клиентом..."></textarea>
+    </div>
+    <div class="lead-actions">
+      <div>
+        <button class="lead-action-btn primary" id="primaryAction" onclick="handlePrimaryAction()">Позвонить</button>
+        <button class="lead-action-btn secondary" id="secondaryAction" onclick="handleSecondaryAction()">Написать</button>
+      </div>
+      <button class="save-changes-btn" onclick="saveLeadChanges()">Сохранить изменения</button>
+    </div>
+  </div>
+
+  <div class="project-card" id="projectCard">
+    <button class="close-card" onclick="closeProjectCard()">&times;</button>
+    <h3>Детали проекта</h3>
+    <div class="project-info">
+      <p><strong>Название:</strong> <span id="projectName"></span></p>
+      <p><strong>Клиент:</strong> <span id="projectClient"></span></p>
+      <p><strong>Дата старта:</strong> <span id="projectStartDate"></span></p>
+    </div>
+    <div class="project-roadmap">
+      <strong>Дорожная карта:</strong>
+      <div id="roadmapContent"></div>
+    </div>
+    <div class="project-status">
+      <strong>Статус проекта:</strong>
+      <select id="projectStatus">
+        <option value="waiting">Ожидание</option>
+        <option value="in_progress">В работе</option>
+        <option value="review">На проверке</option>
+        <option value="completed">Завершен</option>
+        <option value="cancelled">Отменен</option>
+      </select>
+    </div>
+    <div class="project-comments">
+      <strong>Комментарии:</strong>
+      <textarea id="projectComments" placeholder="Введите комментарии по проекту..."></textarea>
+    </div>
+    <div class="project-actions">
+      <button class="save-project-btn" onclick="saveProjectChanges()">Сохранить изменения</button>
+    </div>
+  </div>
+
+  <div class="employee-card" id="employeeCard">
+    <button class="close-card" onclick="closeEmployeeCard()">&times;</button>
+    <h3>Информация о сотруднике</h3>
+    <div class="employee-info">
+      <p><strong>ФИО:</strong> <span id="employeeName"></span></p>
+      <p><strong>Роль:</strong> <span id="employeeRole"></span></p>
+      <p><strong>Телефон:</strong> <span id="employeePhone"></span></p>
+      <p><strong>Email:</strong> <span id="employeeEmail"></span></p>
+    </div>
+    <div class="employee-roles">
+      <strong>Роль:</strong>
+      <select id="employeeRoleSelect">
+        <option value="admin">Администратор</option>
+        <option value="manager">Менеджер</option>
+        <option value="developer">Разработчик</option>
+        <option value="designer">Дизайнер</option>
+      </select>
+    </div>
+    <div class="employee-rights">
+      <strong>Права доступа:</strong>
+      <textarea id="employeeRights" placeholder="Введите права доступа..."></textarea>
+    </div>
+    <div class="employee-actions">
+      <button class="employee-action-btn primary" onclick="saveEmployeeChanges()">Сохранить изменения</button>
+      <button class="employee-action-btn danger" onclick="deleteEmployeeFromCard()">Удалить сотрудника</button>
+    </div>
+  </div>
+
+  <script>
+    // Сортировка таблиц
+    let currentSort = {
+      column: -1,
+      direction: 'asc'
+    };
+
+    const originalSortTable = window.sortTable;
+    window.sortTable = function(tableId, column) {
+      const table = document.getElementById('table-' + tableId);
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const headers = table.querySelectorAll('th');
+      
+      // Удаляем все стрелочки
+      headers.forEach(header => {
+        const arrow = header.querySelector('.sort-arrow');
+        if (arrow) arrow.remove();
+      });
+
+      // Определяем направление сортировки
+      if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.column = column;
+        currentSort.direction = 'asc';
+      }
+
+      // Добавляем стрелочку
+      const arrow = document.createElement('span');
+      arrow.className = `sort-arrow ${currentSort.direction === 'asc' ? 'up' : 'down'}`;
+      headers[column].appendChild(arrow);
+
+      // Сортируем строки
+      rows.sort((a, b) => {
+        const aValue = a.cells[column].textContent.trim();
+        const bValue = b.cells[column].textContent.trim();
+        
+        if (currentSort.direction === 'asc') {
+          return aValue.localeCompare(bValue, 'ru');
+        } else {
+          return bValue.localeCompare(aValue, 'ru');
+        }
+      });
+
+      // Очищаем и заполняем таблицу отсортированными строками
+      tbody.innerHTML = '';
+      rows.forEach(row => tbody.appendChild(row));
+
+      // Обновляем обработчики кликов
+      setupTableRowClicks();
+      setupProjectRowClicks();
+    };
+
+    const originalFilterTable = window.filterTable;
+    window.filterTable = function(type) {
+      const input = document.querySelector(`#section-${type} .admin-search`);
+      const filter = input.value.toLowerCase();
+      const table = document.getElementById('table-' + type);
+      const trs = table.querySelectorAll('tbody tr');
+      trs.forEach(tr => {
+        const text = tr.textContent.toLowerCase();
+        tr.style.display = text.includes(filter) ? '' : 'none';
+      });
+
+      // Обновляем обработчики кликов
+      setupTableRowClicks();
+      setupProjectRowClicks();
+    };
+
+    // Анимация шариков на фоне (как в cabinet.html)
+    (function() {
+      const canvas = document.getElementById('backgroundCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      class Ball {
+        constructor() { this.reset(); }
+        getPastelColor() {
+          const r = Math.floor(Math.random() * 55 + 200);
+          const g = Math.floor(Math.random() * 55 + 200);
+          const b = Math.floor(Math.random() * 55 + 200);
+          return `rgba(${r}, ${g}, ${b}, ${this.opacity})`;
+        }
+        reset() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 6 + 2;
+          this.speedX = (Math.random() - 0.5) * 2;
+          this.speedY = (Math.random() - 0.5) * 2;
+          this.opacity = Math.random() * 0.4 + 0.2;
+          const pastelColors = [
+            `rgba(255, 209, 220, ${this.opacity})`,
+            `rgba(208, 242, 255, ${this.opacity})`,
+            `rgba(219, 255, 208, ${this.opacity})`,
+            `rgba(255, 236, 208, ${this.opacity})`,
+            `rgba(236, 208, 255, ${this.opacity})`,
+            `rgba(255, 255, 208, ${this.opacity})`,
+            `rgba(208, 255, 249, ${this.opacity})`,
+            this.getPastelColor()
+          ];
+          this.color = pastelColors[Math.floor(Math.random() * pastelColors.length)];
+          this.originalOpacity = this.opacity;
+          this.fadeDirection = Math.random() > 0.5 ? 0.001 : -0.001;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+          if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+          if (this.x < -50 || this.x > canvas.width + 50 || this.y < -50 || this.y > canvas.height + 50) this.reset();
+          this.opacity += this.fadeDirection;
+          if (this.opacity <= this.originalOpacity - 0.2 || this.opacity >= this.originalOpacity + 0.2) {
+            this.fadeDirection *= -1;
+          }
+          this.color = this.color.replace(/[\d.]+\)$/g, `${this.opacity})`);
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+        }
+      }
+      const balls = Array(75).fill().map(() => new Ball());
+      function animate() {
+        ctx.fillStyle = 'rgba(248, 255, 255, 0.08)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        balls.forEach(ball => { ball.update(); ball.draw(); });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+    // Переключение между плитками и разделами
+    document.querySelectorAll('.admin-tile').forEach(tile => {
+      tile.addEventListener('click', function() {
+        document.querySelector('.admin-dashboard-tiles').style.display = 'none';
+        document.querySelector('.events-panel').style.display = 'none';
+        document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
+        document.querySelector('.admin-container').style.gridTemplateColumns = '1fr';
+        const section = this.dataset.section;
+        const target = document.getElementById('section-' + section);
+        if (target) {
+          target.style.display = '';
+          // Навешиваем обработчики кликов на строки таблиц
+          setupTableRowClicks();
+          setupProjectRowClicks();
+        }
+        window.scrollTo({top: 0, behavior: 'auto'});
+      });
+    });
+    // Кнопка назад к плиткам
+    document.querySelectorAll('.back-to-tiles').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelector('.admin-dashboard-tiles').style.display = '';
+        document.querySelector('.events-panel').style.display = '';
+        document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
+        document.querySelector('.admin-container').style.gridTemplateColumns = '380px 1fr';
+        window.scrollTo({top: 0, behavior: 'auto'});
+      });
+    });
+    // Обработка клика по строке таблицы
+    function setupTableRowClicks() {
+      document.querySelectorAll('#table-consults tbody tr').forEach(row => {
+        row.addEventListener('click', function() {
+          const cells = this.cells;
+          const leadData = {
+            name: cells[0].textContent,
+            phone: cells[1].textContent,
+            email: cells[2].textContent,
+            date: cells[3].textContent,
+            time: cells[4].textContent,
+            contactMethod: cells[5].textContent,
+            messenger: cells[6].textContent,
+            comment: cells[7].textContent
+          };
+          openLeadCard(leadData);
+        });
+      });
+    }
+
+    function openLeadCard(data) {
+      // Заполняем данные
+      document.getElementById('leadName').textContent = data.name;
+      document.getElementById('leadPhone').textContent = data.phone;
+      document.getElementById('leadEmail').textContent = data.email;
+      document.getElementById('leadDate').textContent = data.date;
+      document.getElementById('leadTime').textContent = data.time;
+      document.getElementById('leadContactMethod').textContent = data.contactMethod;
+      document.getElementById('leadMessenger').textContent = data.messenger;
+      document.getElementById('leadComment').textContent = data.comment;
+      
+      // Загружаем сохраненный статус и обратную связь
+      const savedData = JSON.parse(localStorage.getItem(`lead_${data.phone}`) || '{}');
+      document.getElementById('leadStatus').value = savedData.status || 'new';
+      document.getElementById('leadFeedback').value = savedData.feedback || '';
+
+      // Настраиваем кнопки действий
+      const primaryBtn = document.getElementById('primaryAction');
+      const secondaryBtn = document.getElementById('secondaryAction');
+
+      if (data.contactMethod.toLowerCase() === 'телефон') {
+        primaryBtn.textContent = 'Позвонить';
+        secondaryBtn.textContent = 'Написать в ' + data.messenger;
+      } else {
+        primaryBtn.textContent = 'Написать в ' + data.messenger;
+        secondaryBtn.textContent = 'Позвонить';
+      }
+
+      // Показываем карточку
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('leadCard').style.display = 'block';
+    }
+
+    function closeLeadCard() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('leadCard').style.display = 'none';
+    }
+
+    function handlePrimaryAction() {
+      const primaryBtn = document.getElementById('primaryAction');
+      const phone = document.getElementById('leadPhone').textContent;
+      const messenger = document.getElementById('leadMessenger').textContent;
+
+      if (primaryBtn.textContent === 'Позвонить') {
+        window.location.href = `tel:${phone.replace(/\D/g, '')}`;
+      } else {
+        const messengerLinks = {
+          'Telegram': `https://t.me/${phone.replace(/\D/g, '')}`,
+          'WhatsApp': `https://wa.me/${phone.replace(/\D/g, '')}`,
+          'Viber': `viber://chat?number=${phone.replace(/\D/g, '')}`
+        };
+        window.open(messengerLinks[messenger] || '#', '_blank');
+      }
+    }
+
+    function handleSecondaryAction() {
+      const secondaryBtn = document.getElementById('secondaryAction');
+      const phone = document.getElementById('leadPhone').textContent;
+      const messenger = document.getElementById('leadMessenger').textContent;
+
+      if (secondaryBtn.textContent === 'Позвонить') {
+        window.location.href = `tel:${phone.replace(/\D/g, '')}`;
+      } else {
+        const messengerLinks = {
+          'Telegram': `https://t.me/${phone.replace(/\D/g, '')}`,
+          'WhatsApp': `https://wa.me/${phone.replace(/\D/g, '')}`,
+          'Viber': `viber://chat?number=${phone.replace(/\D/g, '')}`
+        };
+        window.open(messengerLinks[messenger] || '#', '_blank');
+      }
+    }
+
+    function saveLeadChanges() {
+      const phone = document.getElementById('leadPhone').textContent;
+      const status = document.getElementById('leadStatus').value;
+      const feedback = document.getElementById('leadFeedback').value;
+      
+      // Сохраняем в localStorage
+      localStorage.setItem(`lead_${phone}`, JSON.stringify({
+        status: status,
+        feedback: feedback
+      }));
+
+      // Обновляем статус в таблице
+      const rows = document.querySelectorAll('#table-consults tbody tr');
+      rows.forEach(row => {
+        if (row.cells[1].textContent === phone) {
+          // Обновляем класс статуса для строки
+          row.classList.remove('status-new', 'status-in_progress', 'status-contacted', 'status-completed', 'status-cancelled');
+          row.classList.add(`status-${status}`);
+          
+          // Обновляем бейдж статуса
+          const statusCell = row.cells[8];
+          statusCell.innerHTML = `<span class="status-badge status-${status}">${getStatusText(status)}</span>`;
+          
+          // Обновляем обратную связь
+          row.cells[9].textContent = feedback;
+        }
+      });
+
+      // Показываем уведомление
+      alert('Изменения сохранены');
+
+      // Добавляем событие в историю
+      addEvent('status', 'Изменен статус заявки', 
+        `Заявка от ${document.getElementById('leadName').textContent} - ${getStatusText(status)}`);
+    }
+
+    function getStatusText(status) {
+      const statusMap = {
+        'new': 'Новая',
+        'in_progress': 'В обработке',
+        'contacted': 'Связались',
+        'completed': 'Завершена',
+        'cancelled': 'Отменена'
+      };
+      return statusMap[status] || status;
+    }
+
+    // Закрытие карточки при клике на оверлей
+    document.getElementById('overlay').addEventListener('click', function() {
+      closeLeadCard();
+      closeProjectCard();
+    });
+
+    // Обработка клика по строке таблицы проектов
+    function setupProjectRowClicks() {
+      document.querySelectorAll('#table-new-projects tbody tr').forEach(row => {
+        row.onclick = function() {
+          const cells = this.cells;
+          const projectData = {
+            client: cells[0].textContent,
+            name: cells[1].textContent,
+            startDate: cells[2].textContent,
+            roadmap: cells[3] ? cells[3].textContent : '',
+            status: cells[4] ? cells[4].textContent : '',
+            comment: cells[5] ? cells[5].textContent : ''
+          };
+          openProjectCard(projectData);
+        };
+      });
+    }
+
+    function openProjectCard(data) {
+      document.getElementById('projectName').textContent = data.name;
+      document.getElementById('projectClient').textContent = data.client;
+      document.getElementById('projectStartDate').textContent = data.startDate;
+      const savedData = JSON.parse(localStorage.getItem(`project_${data.name}`) || '{}');
+      const roadmap = savedData.roadmap || data.roadmap || '';
+      const roadmapContent = document.getElementById('roadmapContent');
+      roadmapContent.innerHTML = '';
+      if (!roadmap || roadmap === 'Ожидание') {
+        const btn = document.createElement('button');
+        btn.id = 'formRoadmapBtn';
+        btn.className = 'save-project-btn';
+        btn.textContent = 'Сформировать';
+        btn.onclick = function() { window.open('../roadmap/roadmap.html', '_blank'); };
+        roadmapContent.appendChild(btn);
+      } else {
+        roadmapContent.textContent = roadmap;
+      }
+      document.getElementById('projectStatus').value = savedData.status || data.status || 'waiting';
+      document.getElementById('projectComments').value = savedData.comment || data.comment || '';
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('projectCard').style.display = 'block';
+    }
+
+    function closeProjectCard() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('projectCard').style.display = 'none';
+    }
+
+    function saveProjectChanges() {
+      const name = document.getElementById('projectName').textContent;
+      const client = document.getElementById('projectClient').textContent;
+      const roadmap = document.getElementById('projectRoadmap').value;
+      const status = document.getElementById('projectStatus').value;
+      const comment = document.getElementById('projectComments').value;
+      localStorage.setItem(`project_${name}`, JSON.stringify({
+        roadmap: roadmap,
+        status: status,
+        comment: comment
+      }));
+      const rows = document.querySelectorAll('#table-new-projects tbody tr');
+      rows.forEach(row => {
+        if (row.cells[1].textContent === name && row.cells[0].textContent === client) {
+          row.cells[3].textContent = roadmap || 'Ожидание';
+          row.cells[4].innerHTML = `<span class=\"status-badge status-${status}\">${getProjectStatusText(status)}</span>`;
+          row.cells[5].textContent = comment;
+        }
+      });
+      alert('Изменения сохранены');
+
+      // Добавляем событие в историю
+      addEvent('project', 'Обновлен проект', 
+        `Проект "${name}" - ${getProjectStatusText(status)}`);
+    }
+
+    function getProjectStatusText(status) {
+      const statusMap = {
+        'waiting': 'Ожидание',
+        'in_progress': 'В работе',
+        'review': 'На проверке',
+        'completed': 'Завершен',
+        'cancelled': 'Отменен'
+      };
+      return statusMap[status] || status;
+    }
+
+    // --- Сотрудники (localStorage) ---
+    function getEmployees() {
+      return JSON.parse(localStorage.getItem('employees') || '[]');
+    }
+    function setEmployees(arr) {
+      localStorage.setItem('employees', JSON.stringify(arr));
+    }
+    function renderEmployees() {
+      const arr = getEmployees();
+      const tbody = document.getElementById('employeesTbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      arr.forEach((emp, idx) => {
+        tbody.innerHTML += `<tr onclick="openEmployeeCard(${idx})">
+          <td>${emp.name}</td>
+          <td>${emp.role}</td>
+          <td>${emp.rights}</td>
+          <td>${emp.phone}</td>
+          <td>${emp.email}</td>
+        </tr>`;
+      });
+    }
+    function showEmployeeForm(idx) {
+      const arr = getEmployees();
+      let emp = idx!=null ? arr[idx] : {name:'',role:'',rights:'',phone:'',email:''};
+      const block = document.getElementById('employeeFormBlock');
+      block.innerHTML = `<form id='employeeForm' onsubmit='return false;'>
+        <div class='employee-form-row'>
+          <label>ФИО <input name='name' value='${emp.name||''}' required></label>
+          <label>Роль <input name='role' value='${emp.role||''}'></label>
+          <label>Права <input name='rights' value='${emp.rights||''}'></label>
+        </div>
+        <div class='employee-form-row'>
+          <label>Телефон <input name='phone' value='${emp.phone||''}'></label>
+          <label>Email <input name='email' value='${emp.email||''}'></label>
+        </div>
+        <div class='employee-form-actions'>
+          <button class='btn' type='submit'>${idx!=null?'Сохранить':'Добавить'}</button>
+          <button class='btn' type='button' onclick='hideEmployeeForm()'>Отмена</button>
+        </div>
+      </form>`;
+      block.style.display = '';
+      document.getElementById('employeeForm').onsubmit = function() {
+        const f = document.getElementById('employeeForm');
+        const data = Object.fromEntries(new FormData(f));
+        if(idx!=null) arr[idx]=data; else arr.push(data);
+        setEmployees(arr);
+        renderEmployees();
+        hideEmployeeForm();
+      };
+    }
+    function hideEmployeeForm() {
+      document.getElementById('employeeFormBlock').style.display = 'none';
+    }
+    function deleteEmployee(idx) {
+      if(confirm('Удалить сотрудника?')) {
+        const arr = getEmployees();
+        arr.splice(idx,1);
+        setEmployees(arr);
+        renderEmployees();
+      }
+    }
+    // Рендерим сотрудников при открытии секции
+    document.addEventListener('DOMContentLoaded', function() {
+      renderEmployees();
+    });
+
+    let currentEmployeeIndex = null;
+
+    function openEmployeeCard(idx) {
+      const arr = getEmployees();
+      const emp = arr[idx];
+      currentEmployeeIndex = idx;
+      
+      document.getElementById('employeeName').textContent = emp.name;
+      document.getElementById('employeeRole').textContent = emp.role;
+      document.getElementById('employeePhone').textContent = emp.phone;
+      document.getElementById('employeeEmail').textContent = emp.email;
+      document.getElementById('employeeRoleSelect').value = emp.role;
+      document.getElementById('employeeRights').value = emp.rights;
+      
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('employeeCard').style.display = 'block';
+    }
+
+    function closeEmployeeCard() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('employeeCard').style.display = 'none';
+      currentEmployeeIndex = null;
+    }
+
+    function saveEmployeeChanges() {
+      if (currentEmployeeIndex === null) return;
+      
+      const arr = getEmployees();
+      const emp = arr[currentEmployeeIndex];
+      
+      emp.role = document.getElementById('employeeRoleSelect').value;
+      emp.rights = document.getElementById('employeeRights').value;
+      
+      setEmployees(arr);
+      renderEmployees();
+      closeEmployeeCard();
+      alert('Изменения сохранены');
+
+      // Добавляем событие в историю
+      addEvent('employee', 'Обновлен сотрудник', 
+        `Сотрудник ${emp.name} - ${emp.role}`);
+    }
+
+    function deleteEmployeeFromCard() {
+      if (currentEmployeeIndex === null) return;
+      
+      if (confirm('Удалить сотрудника?')) {
+        const arr = getEmployees();
+        arr.splice(currentEmployeeIndex, 1);
+        setEmployees(arr);
+        renderEmployees();
+        closeEmployeeCard();
+
+        // Добавляем событие в историю
+        addEvent('employee', 'Удален сотрудник', 
+          `Сотрудник ${emp.name}`);
+      }
+    }
+
+    // Функции для работы с историей событий
+    function addEvent(type, title, details) {
+      const events = JSON.parse(localStorage.getItem('admin_events') || '[]');
+      const event = {
+        time: new Date().toLocaleString('ru-RU'),
+        type,
+        title,
+        details
+      };
+      events.unshift(event);
+      if (events.length > 50) events.pop(); // Храним только последние 50 событий
+      localStorage.setItem('admin_events', JSON.stringify(events));
+      renderEvents();
+    }
+
+    function renderEvents() {
+      const events = JSON.parse(localStorage.getItem('admin_events') || '[]');
+      const container = document.getElementById('eventsList');
+      container.innerHTML = events.map(event => `
+        <div class="event-item">
+          <div class="event-time">${event.time}</div>
+          <div class="event-title">
+            <span class="event-type ${event.type}">${getEventTypeText(event.type)}</span>
+            ${event.title}
+          </div>
+          <div class="event-details">${event.details}</div>
+        </div>
+      `).join('');
+    }
+
+    function getEventTypeText(type) {
+      const types = {
+        status: 'Статус',
+        employee: 'Сотрудник',
+        project: 'Проект',
+        consult: 'Консультация'
+      };
+      return types[type] || type;
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+      renderEmployees();
+      renderEvents();
+    });
+  </script>
+</body>
+</html> 

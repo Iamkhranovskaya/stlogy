@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет | Сайтология</title>
+  <link rel="icon" type="image/png" href="fav.png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body {
+      height: 100%;
+    }
+    body {
+      background: var(--bg-color, #F8FFFF);
+      color: var(--text-color, #2A5A5A);
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-top: 80px;
+    }
+    .page-wrapper {
+      flex: 1 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      position: fixed;
+      top: 0; width: 100%;
+      background: var(--light-color, #fff);
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 18px 32px 18px 32px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--accent-color, #4BAEA7);
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 36px;
+    }
+    nav a {
+      margin-left: 30px;
+      text-decoration: none;
+      color: var(--text-color, #2A5A5A);
+      font-weight: 500;
+    }
+    @media (max-width: 900px) {
+      header {
+        padding: 14px 10px;
+        justify-content: center;
+      }
+      nav {
+        gap: 18px;
+      }
+      .logo {
+        margin-right: 0;
+        justify-content: center;
+      }
+    }
+    .footer {
+      flex-shrink: 0;
+      background: var(--light-color, #fff);
+    }
+    .footer-content {
+      background: var(--light-color, #fff);
+    }
+    .modal-overlay {
+      display: flex;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+    .modal-content {
+      background: var(--light-color, #fff);
+      padding: 40px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+      text-align: center;
+    }
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 30px;
+      cursor: pointer;
+    }
+    .cta-button {
+      padding: 15px 40px;
+      background: var(--accent-color, #4BAEA7);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      margin-top: 10px;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .cta-button:hover {
+      background: #2A5A5A;
+    }
+    input[type="tel"], input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 18px;
+      font-size: 1em;
+    }
+    .cabinet-container {
+      max-width: 1200px;
+      margin: 60px auto 40px auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+    }
+    @media (max-width: 900px) {
+      .cabinet-container { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--light-color, #fff);
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+      padding: 32px 28px 28px 28px;
+      margin-bottom: 0;
+    }
+    .cabinet-dashboard .progress-bar {
+      display: inline-block;
+      width: 80px;
+      height: 8px;
+      background: #e6f2f2;
+      border-radius: 6px;
+      margin: 0 8px;
+      vertical-align: middle;
+      overflow: hidden;
+    }
+    .cabinet-dashboard .progress-bar span {
+      display: block;
+      height: 100%;
+      background: var(--accent-color, #4BAEA7);
+      border-radius: 6px;
+    }
+    .dashboard-label { color: var(--accent-color); font-weight: 600; }
+    .status.in-progress { color: #F7B731; font-weight: 600; margin-left: 8px; }
+    .paid { color: #4BAEA7; font-weight: 600; }
+    .pending { color: #F7B731; font-weight: 600; }
+    .cabinet-chat .chat-window {
+      background: #f8ffff;
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 180px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+    }
+    .chat-message { margin-bottom: 8px; }
+    .chat-message.from-team { color: #2A5A5A; }
+    .chat-message.from-client { color: #4BAEA7; text-align: right; }
+    .chat-form { display: flex; gap: 10px; }
+    .chat-form input { flex: 1; border-radius: 8px; border: 1.5px solid #bbb; padding: 10px; }
+    .cta-button.small { padding: 8px 18px; font-size: 0.98em; border-radius: 18px; }
+    .file-date { color: #888; font-size: 0.95em; margin-left: 8px; }
+    .comment-block { background: #f8ffff; border-radius: 10px; padding: 10px 14px; margin-top: 8px; }
+    .sla-info { color: #888; font-size: 0.98em; margin-top: 10px; }
+    .enabled { color: #4BAEA7; font-weight: 600; }
+    .cabinet-dashboard-tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 32px;
+      max-width: 1100px;
+      margin: 60px auto 40px auto;
+      padding: 0 16px;
+    }
+    .dashboard-tile {
+      background: var(--light-color, #fff);
+      border-radius: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      padding: 32px 18px 24px 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .dashboard-tile:hover {
+      box-shadow: 0 8px 32px rgba(75,174,167,0.13);
+      transform: translateY(-4px) scale(1.03);
+    }
+    .tile-icon {
+      font-size: 2.2em;
+      margin-bottom: 12px;
+    }
+    .tile-title {
+      font-size: 1.18em;
+      font-weight: 700;
+      color: var(--accent-color, #4BAEA7);
+      margin-bottom: 8px;
+    }
+    .tile-desc {
+      color: #666;
+      font-size: 1em;
+    }
+    .back-to-tiles { margin-bottom: 18px; margin-top: -10px; }
+    .gantt-container {
+      margin-top: 24px;
+      width: 100%;
+    }
+    .gantt-header, .gantt-row {
+      display: grid;
+      grid-template-columns: 1.5fr 2.5fr 1fr 1fr;
+      align-items: center;
+      gap: 12px;
+      font-size: 1em;
+    }
+    .gantt-header {
+      font-weight: 700;
+      color: var(--accent-color, #4BAEA7);
+      margin-bottom: 10px;
+    }
+    .gantt-row {
+      background: #f8ffff;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      padding: 10px 0 10px 10px;
+      position: relative;
+    }
+    .gantt-bar {
+      position: relative;
+      height: 22px;
+      background: var(--accent-color, #4BAEA7);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 0.98em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(75,174,167,0.08);
+      margin-left: 0;
+      margin-right: 0;
+      min-width: 80px;
+      max-width: 100%;
+    }
+    .gantt-bar.in-progress {
+      background: #F7B731;
+      color: #fff;
+    }
+    .milestone {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background: #4BAEA7;
+      border-radius: 50%;
+      margin-right: 6px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(75,174,167,0.13);
+    }
+    .gantt-row .cta-button.small {
+      padding: 6px 14px;
+      font-size: 0.98em;
+      border-radius: 14px;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+    .modal-content {
+      background: var(--light-color, #fff);
+      padding: 32px 24px;
+      border-radius: 18px;
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+      text-align: center;
+    }
+    .close-modal {
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      font-size: 28px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <header>
+      <div class="logo">
+        <img src="fav.png" alt="favicon" style="height:32px; margin-left:12px; vertical-align:middle;">
+        САЙТОЛОГИЯ
+      </div>
+      <nav>
+        <a href="#home">Главная</a>
+        <a href="#services">Услуги</a>
+        <a href="#about">Команда</a>
+        <a href="#faq">FAQ</a>
+        <a href="blog.html">Блог</a>
+        <a href="cabinet.html" id="loginBtn" style="background: none; border: none; color: var(--accent-color); font-size: 1em; font-weight: 500; margin-left: 30px; cursor: pointer; padding: 0 0; transition: color 0.2s; text-decoration: none;">Войти</a>
+      </nav>
+    </header>
+    <!--
+    <div class="modal-overlay" id="loginModal">
+      <div class="modal-content">
+        <span class="close-modal" id="closeLoginModal">&times;</span>
+        <h2 style="margin-bottom:20px;">Вход по номеру телефона</h2>
+        <form id="loginForm">
+          <div id="phoneStep">
+            <label style="display:block; margin-bottom:8px;">Телефон</label>
+            <input type="tel" id="loginPhone" required placeholder="+7 (___) ___-__-__">
+            <button type="submit" class="cta-button">Получить код</button>
+          </div>
+          <div id="codeStep" style="display:none;">
+            <label style="display:block; margin-bottom:8px;">Введите код из SMS</label>
+            <input type="text" id="smsCode" required maxlength="6" placeholder="Код">
+            <button type="submit" class="cta-button">Войти</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    -->
+    <canvas id="backgroundCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1;"></canvas>
+    <!-- Главный блок управления сайтом -->
+    <section class="cabinet-site-manage card cabinet-site-main-block" id="cabinet-site-manage" style="margin: 40px auto 40px; max-width: 1200px; box-shadow: 0 8px 32px rgba(75,174,167,0.13); padding: 48px 32px; border-radius: 28px; background: #fff;">
+      <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 32px;">
+        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80" alt="Скрин сайта" style="max-width: 100%; border-radius: 18px; box-shadow: 0 4px 24px rgba(75,174,167,0.10); margin-bottom: 24px;">
+        <h2 style="font-size: 2.2em; margin-bottom: 12px; text-align: center; color: var(--accent-color, #4BAEA7);">Название вашего сайта</h2>
+        <button id="openSiteManagePanel" class="cta-button" style="font-size: 1.1em; padding: 14px 40px; margin-top: 10px;">Редактировать сайт</button>
+      </div>
+      <div id="siteManagePanel" style="display: none;">
+        <div class="site-manage-tabs" style="margin-bottom: 24px; text-align: center;">
+          <button class="tab-btn active" data-tab="main">Основная информация</button>
+          <button class="tab-btn" data-tab="images">Картинки</button>
+          <button class="tab-btn" data-tab="prices">Цены</button>
+          <button class="tab-btn" data-tab="blog">Блог</button>
+        </div>
+        <div class="tab-content" id="tab-main">
+          <form id="siteMainForm">
+            <label>Заголовок сайта:<br>
+              <input type="text" name="siteTitle" value="Ваш заголовок">
+            </label><br>
+            <label>Описание:<br>
+              <textarea name="siteDesc" rows="3">Ваше описание</textarea>
+            </label><br>
+            <label>Контакты:<br>
+              <input type="text" name="siteContacts" value="Ваши контакты">
+            </label><br>
+            <button type="submit" class="cta-button" style="font-size: 1.1em; padding: 14px 40px; margin-top: 18px;">Сохранить</button>
+          </form>
+        </div>
+        <div class="tab-content" id="tab-images" style="display:none;">
+          <form id="siteImagesForm">
+            <label>Логотип:<br>
+              <input type="file" name="siteLogo" accept="image/*">
+            </label><br>
+            <label>Баннер:<br>
+              <input type="file" name="siteBanner" accept="image/*">
+            </label><br>
+            <button type="submit" class="cta-button" style="font-size: 1.1em; padding: 14px 40px; margin-top: 18px;">Сохранить</button>
+          </form>
+        </div>
+        <div class="tab-content" id="tab-prices" style="display:none;">
+          <form id="sitePricesForm">
+            <label>Цена услуги 1:<br>
+              <input type="number" name="price1" value="1000">
+            </label><br>
+            <label>Цена услуги 2:<br>
+              <input type="number" name="price2" value="2000">
+            </label><br>
+            <button type="submit" class="cta-button" style="font-size: 1.1em; padding: 14px 40px; margin-top: 18px;">Сохранить</button>
+          </form>
+        </div>
+        <div class="tab-content" id="tab-blog" style="display:none;">
+          <div id="blogList"></div>
+          <button class="cta-button" id="addBlogPostBtn" type="button" style="font-size: 1.1em; padding: 14px 40px; margin-top: 18px;">Добавить статью</button>
+          <div id="blogEditor" style="display:none; margin-top: 18px;">
+            <form id="blogForm">
+              <label>Заголовок:<br>
+                <input type="text" name="blogTitle">
+              </label><br>
+              <label>Текст:<br>
+                <textarea name="blogContent" rows="5"></textarea>
+              </label><br>
+              <button type="submit" class="cta-button" style="font-size: 1.1em; padding: 14px 40px;">Сохранить</button>
+              <button type="button" class="cta-button small" id="cancelBlogEdit">Отмена</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="cabinet-dashboard-tiles">
+      <div class="dashboard-tile" data-section="project">
+        <div class="tile-icon">🌐</div>
+        <div class="tile-title">Проект</div>
+        <div class="tile-desc">Статус, этап, менеджер, дедлайн</div>
+      </div>
+      <div class="dashboard-tile" data-section="roadmap">
+        <div class="tile-icon">🗺️</div>
+        <div class="tile-title">Этапы</div>
+        <div class="tile-desc">Дорожная карта, комментарии, прогресс</div>
+      </div>
+      <div class="dashboard-tile" data-section="files">
+        <div class="tile-icon">📁</div>
+        <div class="tile-title">Файлы</div>
+        <div class="tile-desc">Загрузка, скачивание, история версий</div>
+      </div>
+      <div class="dashboard-tile" data-section="finance">
+        <div class="tile-icon">💰</div>
+        <div class="tile-title">Финансы</div>
+        <div class="tile-desc">Счета, оплата, история транзакций</div>
+      </div>
+      <div class="dashboard-tile" data-section="chat">
+        <div class="tile-icon">💬</div>
+        <div class="tile-title">Чат</div>
+        <div class="tile-desc">Общение с командой, файлы, уведомления</div>
+      </div>
+      <div class="dashboard-tile" data-section="docs">
+        <div class="tile-icon">📄</div>
+        <div class="tile-title">Документы</div>
+        <div class="tile-desc">Договор, акты, NDA</div>
+      </div>
+      <div class="dashboard-tile" data-section="feedback">
+        <div class="tile-icon">🔄</div>
+        <div class="tile-title">Отзывы и доработки</div>
+        <div class="tile-desc">Оставить отзыв, запросить доработку</div>
+      </div>
+      <div class="dashboard-tile" data-section="archive">
+        <div class="tile-icon">🗂️</div>
+        <div class="tile-title">Архив</div>
+        <div class="tile-desc">Прошлые проекты, файлы, акты</div>
+      </div>
+      <div class="dashboard-tile" data-section="security">
+        <div class="tile-icon">🔒</div>
+        <div class="tile-title">Безопасность</div>
+        <div class="tile-desc">2FA, история входов, доступы</div>
+      </div>
+      <div class="dashboard-tile" data-section="support">
+        <div class="tile-icon">🛠️</div>
+        <div class="tile-title">Техподдержка</div>
+        <div class="tile-desc">Тикеты, обращения, SLA</div>
+      </div>
+    </div>
+    <div class="cabinet-container">
+      <!-- 1. Dashboard -->
+      <section class="cabinet-dashboard card cabinet-section" id="cabinet-project" style="display:none;">
+        <button class="back-to-tiles cta-button small" type="button">← К разделам</button>
+        <h2>Панель проекта</h2>
+        <div class="dashboard-info">
+          <div><span class="dashboard-label">🌐 Проект:</span> Сайт для мебельной фабрики</div>
+          <div><span class="dashboard-label">📍 Статус:</span> На этапе дизайна <span class="progress-bar"><span style="width:50%"></span></span> 50%</div>
+          <div><span class="dashboard-label">🗓 Ближайший дедлайн:</span> 12 мая 2025</div>
+          <div><span class="dashboard-label">🧑‍💼 Менеджер:</span> Алексей Петров <a href="https://t.me/alekseystudio" target="_blank">@alekseystudio</a></div>
+        </div>
+      </section>
+      <!-- 2. Roadmap -->
+      <section class="cabinet-roadmap card cabinet-section" id="cabinet-roadmap" style="display:none;">
+        <button class="back-to-tiles cta-button small" type="button">← К разделам</button>
+        <h2>Этапы разработки (Гант)</h2>
+        <div class="gantt-container">
+          <div class="gantt-header">
+            <div>Этап</div>
+            <div>План</div>
+            <div>Контрольные точки</div>
+            <div>Встреча</div>
+          </div>
+          <div class="gantt-row">
+            <div>Брифинг</div>
+            <div>
+              <div class="gantt-bar" style="left:0%;width:10%;">01.05–03.05</div>
+            </div>
+            <div>
+              <span class="milestone" title="Бриф получен"></span>
+            </div>
+            <div>
+              <button class="cta-button small schedule-btn" data-stage="Брифинг">Назначить</button>
+            </div>
+          </div>
+          <div class="gantt-row">
+            <div>Прототип</div>
+            <div>
+              <div class="gantt-bar" style="left:10%;width:15%;">04.05–08.05</div>
+            </div>
+            <div>
+              <span class="milestone" title="Прототип утверждён"></span>
+            </div>
+            <div>
+              <button class="cta-button small schedule-btn" data-stage="Прототип">Назначить</button>
+            </div>
+          </div>
+          <div class="gantt-row">
+            <div>Дизайн</div>
+            <div>
+              <div class="gantt-bar in-progress" style="left:25%;width:20%;">09.05–18.05</div>
+            </div>
+            <div>
+              <span class="milestone" title="Дизайн готов"></span>
+            </div>
+            <div>
+              <button class="cta-button small schedule-btn" data-stage="Дизайн">Назначить</button>
+            </div>
+          </div>
+          <div class="gantt-row">
+            <div>Верстка</div>
+            <div>
+              <div class="gantt-bar" style="left:45%;width:15%;">19.05–25.05</div>
+            </div>
+            <div>
+              <span class="milestone" title="Верстка завершена"></span>
+            </div>
+            <div>
+              <button class="cta-button small schedule-btn" data-stage="Верстка">Назначить</button>
+            </div>
+          </div>
+          <div class="gantt-row">
+            <div>Наполнение</div>
+            <div>
+              <div class="gantt-bar" style="left:60%;width:10%;">26.05–29.05</div>
+            </div>
+            <div>
+              <span class="milestone" title="Контент добавлен"></span>
+            </div>
+            <div>
+              <button class="cta-button small schedule-btn" data-stage="Наполнение">Назначить</button>
+            </div>
+          </div>
+          <div class="gantt-row">
+            <div>Тестирование</div>
+            <div>
+              <div class="gantt-bar" style="left:70%;width:10%;">30.05–02.06</div>
+            </div>
+            <div>
+              <span class="milestone" title="Тесты пройдены"></span>
+            </div>
+            <div>
+              <button class="cta-button small schedule-btn" data-stage="Тестирование">Назначить</button>
+            </div>
+          </div>
+          <div class="gantt-row">
+            <div>Запуск</div>
+            <div>
+              <div class="gantt-bar" style="left:80%;width:8%;">03.06–05.06</div>
+            </div>
+            <div>
+              <span class="milestone" title="Проект запущен"></span>
+            </div>
+            <div>
+              <button class="cta-button small schedule-btn" data-stage="Запуск">Назначить</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- 3. Файлы и материалы -->
+      <section class="cabinet-files card cabinet-section" id="cabinet-files" style="display:none;">
+        <button class="back-to-tiles cta-button small" type="button">← К разделам</button>
+        <h2>Файлы и материалы</h2>
+        <div class="files-blocks" style="display: flex; flex-wrap: wrap; gap: 36px;">
+          <div style="flex:1; min-width:220px;">
+            <h3 style="color:var(--accent-color, #4BAEA7); margin-bottom:10px;">Ваши файлы</h3>
+            <ul class="file-list">
+              <li>📁 <a href="#">my_logo.svg</a> <span class="file-date">02.05.2025</span></li>
+              <li>📁 <a href="#">content_text.docx</a></li>
+            </ul>
+            <button class="cta-button">Загрузить файл</button>
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <h3 style="color:var(--accent-color, #4BAEA7); margin-bottom:10px;">Файлы от администратора</h3>
+            <ul class="file-list">
+              <li>📁 <a href="#">logo_v2.svg</a> <span class="file-date">01.04.2025</span></li>
+              <li>📁 <a href="#">design_mockup_v1.pdf</a></li>
+              <li>📁 <a href="#">Техническое задание.docx</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <!-- 4. Финансы и оплата -->
+      <section class="cabinet-finance card cabinet-section" id="cabinet-finance" style="display:none;">
+        <button class="back-to-tiles cta-button small" type="button">← К разделам</button>
+        <h2>Финансы и оплата</h2>
+        <ul class="finance-list">
+          <li>💰 Счёт №123 от 01.04.25 — 50,000 ₽ — <span class="paid">Оплачен</span></li>
+          <li>💰 Счёт №124 от 15.04.25 — 30,000 ₽ — <span class="pending">В ожидании</span> <button class="cta-button small">Оплатить</button></li>
+        </ul>
+        <div class="finance-history">
+          <a href="#">История транзакций</a>
+        </div>
+      </section>
+      <!-- 5. Чат -->
+      <section class="cabinet-chat card cabinet-section" id="cabinet-chat" style="display:none;">
+        <button class="back-to-tiles cta-button small" type="button">← К разделам</button>
+        <h2>Общение с командой</h2>
+        <div class="chat-window">
+          <div class="chat-message from-team">
+            <b>Алексей:</b> Привет! На макете шапки логотип обрезан — поправьте, пожалуйста.
+          </div>
+          <div class="chat-message from-client">
+            <b>Вы:</b> Исправим сегодня!
+          </div>
+        </div>
+        <form class="chat-form">
+          <input type="text" placeholder="Написать сообщение..." />
+          <button type="submit" class="cta-button small">Отправить</button>
+        </form>
+      </section>
+      <!-- 6. Документы -->
+      <section class="cabinet-docs card cabinet-section" id="cabinet-docs" style="display:none;">
+        <button class="back-to-tiles cta-button small" type="button">← К разделам</button>
+        <h2>Документы</h2>
+        <ul class="doc-list">
+          <li>📄 <a href="#">Договор №AF-2025</a></li>
+          <li>📄 <a href="#">Акт на сумму 50,000 ₽ от 02.04.2025</a></li>
+        </ul>
+      </section>
+      <!-- 7. Отзывы и доработки -->
+      <section class="cabinet-feedback card cabinet-section" id="cabinet-feedback" style="display:none;">
+        <button class="back-to-tiles cta-button small" type="button">← К разделам</button>
+        <h2>Отзывы и доработки</h2>
+        <button class="cta-button small">Оставить отзыв</button>
+        <ul class="feedback-list">
+          <li>🔄 Запрос на доработку: "Добавить блок "Отзывы клиентов" на главную страницу"</li>
+        </ul>
+      </section>
+      <!-- 8. Архив проектов -->
+      <section class="cabinet-archive card cabinet-section" id="cabinet-archive" style="display:none;">
+        <button class="back-to-tiles cta-button small" type="button">← К разделам</button>
+        <h2>Архив проектов</h2>
+        <ul class="archive-list">
+          <li>📁 Сайт "детский центр Радуга" — завершен в сентябре 2023 <button class="cta-button small">Повторить заказ</button></li>
+        </ul>
+      </section>
+      <!-- 9. Безопасность -->
+      <section class="cabinet-security card cabinet-section" id="cabinet-security" style="display:none;">
+        <button class="back-to-tiles cta-button small" type="button">← К разделам</button>
+        <h2>Безопасность</h2>
+        <ul class="security-list">
+          <li>Двухфакторная аутентификация: <span class="enabled">Включена</span></li>
+          <li>История входов <a href="#">Посмотреть</a></li>
+          <li>Управление доступом <a href="#">Настроить</a></li>
+        </ul>
+      </section>
+      <!-- 10. Поддержка -->
+      <section class="cabinet-support card cabinet-section" id="cabinet-support" style="display:none;">
+        <button class="back-to-tiles cta-button small" type="button">← К разделам</button>
+        <h2>Техподдержка</h2>
+        <button class="cta-button small">Оставить тикет</button>
+        <ul class="support-list">
+          <li>📩 Заявка #431: "Сайт не открывается на Safari iOS" — <span class="pending">В обработке</span></li>
+        </ul>
+        <div class="sla-info">SLA: ответим в течение 4 часов</div>
+      </section>
+    </div>
+    <!-- Модальное окно для назначения встречи -->
+    <div class="modal-overlay" id="scheduleModal" style="display:none;">
+      <div class="modal-content" style="max-width:400px;">
+        <span class="close-modal" id="closeScheduleModal">&times;</span>
+        <h3 id="scheduleStageTitle">Назначить встречу</h3>
+        <form id="scheduleForm">
+          <label>Дата:</label>
+          <input type="date" id="scheduleDate" required style="width:100%;margin-bottom:12px;">
+          <label>Время:</label>
+          <input type="time" id="scheduleTime" required style="width:100%;margin-bottom:12px;">
+          <label>Тип:</label>
+          <select id="scheduleType" required style="width:100%;margin-bottom:18px;">
+            <option value="call">Созвон</option>
+            <option value="meeting">Встреча</option>
+          </select>
+          <button type="submit" class="cta-button" style="width:100%;">Запланировать</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-content" style="display: flex; align-items: flex-start;">
+      <div style="height: 100%; display: flex; flex-direction: column; align-items: center;">
+        <img src="logo.jpg" alt="Логотип" style="height: 180px; max-height: 95%; width: auto; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); object-fit: contain; display: block;">
+        <div style="margin-top: 18px; font-size: 1.1em; color: #2A5A5A; text-align: center;">Мы в социальных сетях</div>
+        <div style="display: flex; gap: 16px; margin-top: 10px;">
+          <a href="https://vk.com" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #4BAEA7; transition: background 0.2s;"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/vk.svg" alt="VK" style="width: 22px; height: 22px; filter: invert(1);"></a>
+          <a href="https://t.me" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #229ED9; transition: background 0.2s;"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/telegram.svg" alt="Telegram" style="width: 22px; height: 22px; filter: invert(1);"></a>
+          <a href="https://wa.me" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #25D366; transition: background 0.2s;"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" style="width: 22px; height: 22px; filter: invert(1);"></a>
+          <a href="https://instagram.com" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #E1306C; transition: background 0.2s;"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram" style="width: 22px; height: 22px; filter: invert(1);"></a>
+        </div>
+      </div>
+      <div class="footer-column" style="margin-left: 32px;">
+        <h4>Юридическая информация</h4>
+        <p>ОГРН: 1245000140220</p>
+        <p>ИНН: 5024249437</p>
+        <p>КПП: 502401001</p>
+        <p>Юридический адрес:<br>
+          143082, Московская область,<br>
+          г Красногорск, ул Липовой Рощи,<br>
+          д. 1 к. 3, помещ. 431</p>
+      </div>
+      <div class="footer-column" style="margin-left: 32px;">
+        <h4>Контакты</h4>
+        <p>+7 (925) 566-46-78</p>
+        <p>Email: 1hkv@bk.ru</p>
+      </div>
+      <div class="footer-column" style="margin-left: 32px; min-width: 180px;">
+        <h4>Навигация</h4>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          <li style="margin-bottom: 10px;"><a href="index.html#home">Главная</a></li>
+          <li style="margin-bottom: 10px;"><a href="index.html#services">Услуги</a></li>
+          <li style="margin-bottom: 10px;"><a href="index.html#about">Команда</a></li>
+          <li style="margin-bottom: 10px;"><a href="index.html#faq">FAQ</a></li>
+          <li><a href="blog.html">Блог</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Все права защищены</p>
+    </div>
+  </footer>
+  <script>
+    // Анимация шариков на фоне
+    (function() {
+      const canvas = document.getElementById('backgroundCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      class Ball {
+        constructor() { this.reset(); }
+        getPastelColor() {
+          const r = Math.floor(Math.random() * 55 + 200);
+          const g = Math.floor(Math.random() * 55 + 200);
+          const b = Math.floor(Math.random() * 55 + 200);
+          return `rgba(${r}, ${g}, ${b}, ${this.opacity})`;
+        }
+        reset() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 6 + 2;
+          this.speedX = (Math.random() - 0.5) * 2;
+          this.speedY = (Math.random() - 0.5) * 2;
+          this.opacity = Math.random() * 0.4 + 0.2;
+          const pastelColors = [
+            `rgba(255, 209, 220, ${this.opacity})`,
+            `rgba(208, 242, 255, ${this.opacity})`,
+            `rgba(219, 255, 208, ${this.opacity})`,
+            `rgba(255, 236, 208, ${this.opacity})`,
+            `rgba(236, 208, 255, ${this.opacity})`,
+            `rgba(255, 255, 208, ${this.opacity})`,
+            `rgba(208, 255, 249, ${this.opacity})`,
+            this.getPastelColor()
+          ];
+          this.color = pastelColors[Math.floor(Math.random() * pastelColors.length)];
+          this.originalOpacity = this.opacity;
+          this.fadeDirection = Math.random() > 0.5 ? 0.001 : -0.001;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+          if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+          if (this.x < -50 || this.x > canvas.width + 50 || this.y < -50 || this.y > canvas.height + 50) this.reset();
+          this.opacity += this.fadeDirection;
+          if (this.opacity <= this.originalOpacity - 0.2 || this.opacity >= this.originalOpacity + 0.2) {
+            this.fadeDirection *= -1;
+          }
+          this.color = this.color.replace(/[\d.]+\)$/g, `${this.opacity})`);
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+        }
+      }
+      const balls = Array(75).fill().map(() => new Ball());
+      function animate() {
+        ctx.fillStyle = 'rgba(248, 255, 255, 0.08)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        balls.forEach(ball => { ball.update(); ball.draw(); });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+    // Открытие раздела по клику на плитку
+    document.querySelectorAll('.dashboard-tile').forEach(tile => {
+      tile.addEventListener('click', function() {
+        document.querySelector('.cabinet-dashboard-tiles').style.display = 'none';
+        document.querySelectorAll('.cabinet-section').forEach(sec => sec.style.display = 'none');
+        const section = this.dataset.section;
+        const target = document.getElementById('cabinet-' + section);
+        if (target) target.style.display = '';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+      });
+    });
+    // Кнопка назад к разделам
+    document.querySelectorAll('.back-to-tiles').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelector('.cabinet-dashboard-tiles').style.display = '';
+        document.querySelectorAll('.cabinet-section').forEach(sec => sec.style.display = 'none');
+        window.scrollTo({top: 0, behavior: 'smooth'});
+      });
+    });
+    // Открытие модального окна по кнопке "Назначить"
+    document.querySelectorAll('.schedule-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.getElementById('scheduleModal').style.display = 'flex';
+        document.body.classList.add('modal-open');
+        document.getElementById('scheduleStageTitle').textContent = 'Назначить встречу: ' + btn.dataset.stage;
+      });
+    });
+    // Закрытие модального окна
+    document.getElementById('closeScheduleModal').onclick = function() {
+      document.getElementById('scheduleModal').style.display = 'none';
+      document.body.classList.remove('modal-open');
+    };
+    // Обработка формы
+    document.getElementById('scheduleForm').onsubmit = function(e) {
+      e.preventDefault();
+      alert('Встреча/созвон успешно запланированы!');
+      document.getElementById('scheduleModal').style.display = 'none';
+      document.body.classList.remove('modal-open');
+      this.reset();
+    };
+    // Проверяем роль при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+      const role = localStorage.getItem('role');
+      if (role === 'admin') {
+        window.location.href = 'admin.html';
+      }
+      // если user — ничего не делаем, показываем личный кабинет пользователя
+    });
+    // Переключение вкладок
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+        document.getElementById('tab-' + btn.dataset.tab).style.display = '';
+      });
+    });
+    // Пример сохранения данных (можно заменить на отправку на сервер)
+    document.getElementById('siteMainForm').onsubmit = function(e) {
+      e.preventDefault();
+      alert('Основная информация сохранена!');
+    };
+    document.getElementById('siteImagesForm').onsubmit = function(e) {
+      e.preventDefault();
+      alert('Картинки сохранены!');
+    };
+    document.getElementById('sitePricesForm').onsubmit = function(e) {
+      e.preventDefault();
+      alert('Цены сохранены!');
+    };
+    // Управление блогом (демо)
+    let blogPosts = [];
+    function renderBlogList() {
+      const list = document.getElementById('blogList');
+      list.innerHTML = '';
+      blogPosts.forEach((post, i) => {
+        const div = document.createElement('div');
+        div.innerHTML = `<b>${post.title}</b><br>${post.content}<br>
+          <button onclick="editBlogPost(${i})" type="button">Редактировать</button>
+          <button onclick="deleteBlogPost(${i})" type="button">Удалить</button><hr>`;
+        list.appendChild(div);
+      });
+    }
+    window.editBlogPost = function(i) {
+      document.getElementById('blogEditor').style.display = '';
+      document.getElementById('blogForm').blogTitle.value = blogPosts[i].title;
+      document.getElementById('blogForm').blogContent.value = blogPosts[i].content;
+      document.getElementById('blogForm').onsubmit = function(e) {
+        e.preventDefault();
+        blogPosts[i] = {
+          title: this.blogTitle.value,
+          content: this.blogContent.value
+        };
+        renderBlogList();
+        document.getElementById('blogEditor').style.display = 'none';
+      };
+    };
+    window.deleteBlogPost = function(i) {
+      blogPosts.splice(i, 1);
+      renderBlogList();
+    };
+    document.getElementById('addBlogPostBtn').onclick = function() {
+      document.getElementById('blogEditor').style.display = '';
+      document.getElementById('blogForm').blogTitle.value = '';
+      document.getElementById('blogForm').blogContent.value = '';
+      document.getElementById('blogForm').onsubmit = function(e) {
+        e.preventDefault();
+        blogPosts.push({
+          title: this.blogTitle.value,
+          content: this.blogContent.value
+        });
+        renderBlogList();
+        document.getElementById('blogEditor').style.display = 'none';
+      };
+    };
+    document.getElementById('cancelBlogEdit').onclick = function() {
+      document.getElementById('blogEditor').style.display = 'none';
+    };
+    renderBlogList();
+    // --- JS для открытия панели управления ---
+    document.getElementById('openSiteManagePanel').onclick = function() {
+      window.location.href = 'site-manage.html';
+    };
+  </script>
+</body>
+</html> 
