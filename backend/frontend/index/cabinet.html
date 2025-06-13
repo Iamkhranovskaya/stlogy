@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в личный кабинет - Stlogy</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .auth-form input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .auth-form button {
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .auth-form button:hover {
+            background: #0056b3;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+        .success-message {
+            color: green;
+            margin-top: 10px;
+        }
+        .code-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav id="mainNav">
+            <a href="index.html#home">Главная</a>
+            <a href="index.html#services">Услуги</a>
+            <a href="index.html#promotions">Акции</a>
+            <a href="index.html#about">Команда</a>
+            <a href="cases.html">Кейсы</a>
+            <a href="index.html#faq">FAQ</a>
+            <a href="about.html">О нас</a>
+            <a href="blog.html">Блог</a>
+            <a href="cabinet.html" id="loginBtn">Войти</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="auth-container">
+            <h2>Вход в личный кабинет</h2>
+            <form class="auth-form" id="authForm">
+                <div id="emailStep">
+                    <input type="email" id="email" placeholder="Введите ваш email" required>
+                    <button type="submit">Получить код</button>
+                </div>
+                <div id="codeStep" class="code-input">
+                    <input type="text" id="code" placeholder="Введите код из письма" required>
+                    <button type="submit">Войти</button>
+                </div>
+                <div id="message"></div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const authForm = document.getElementById('authForm');
+        const emailStep = document.getElementById('emailStep');
+        const codeStep = document.getElementById('codeStep');
+        const messageDiv = document.getElementById('message');
+        let currentEmail = '';
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            messageDiv.textContent = '';
+            messageDiv.className = '';
+
+            if (!codeStep.style.display || codeStep.style.display === 'none') {
+                // Шаг 1: Отправка кода
+                currentEmail = document.getElementById('email').value;
+                try {
+                    const response = await fetch('http://localhost:3000/api/send-email-code', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email: currentEmail })
+                    });
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        messageDiv.textContent = 'Код отправлен на ваш email';
+                        messageDiv.className = 'success-message';
+                        emailStep.style.display = 'none';
+                        codeStep.style.display = 'block';
+                    } else {
+                        throw new Error(data.error || 'Ошибка при отправке кода');
+                    }
+                } catch (error) {
+                    messageDiv.textContent = error.message;
+                    messageDiv.className = 'error-message';
+                }
+            } else {
+                // Шаг 2: Проверка кода
+                const code = document.getElementById('code').value;
+                try {
+                    const response = await fetch('http://localhost:3000/api/verify-email-code', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            email: currentEmail,
+                            code: code 
+                        })
+                    });
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        // Сохраняем токен
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('userRole', data.role);
+                        
+                        messageDiv.textContent = 'Успешный вход!';
+                        messageDiv.className = 'success-message';
+                        
+                        // Перенаправляем в личный кабинет
+                        setTimeout(() => {
+                            window.location.href = 'cabinet.html';
+                        }, 1000);
+                    } else {
+                        throw new Error(data.message || 'Ошибка при проверке кода');
+                    }
+                } catch (error) {
+                    messageDiv.textContent = error.message;
+                    messageDiv.className = 'error-message';
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

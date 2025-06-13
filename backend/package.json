@@ -1,0 +1,22 @@
+{
+  "name": "green-backend",
+  "version": "1.0.0",
+  "description": "Backend-сервер для обработки заявок на консультацию",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.3",
+    "pg": "^8.11.1"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Iamkhranovskaya/stlogy.git"
+  }
+}
